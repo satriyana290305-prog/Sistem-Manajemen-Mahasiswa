@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sistem Manajemen Mahasiswa</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg, #fce7f3, #ede9fe);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    transition:0.3s;
+}
+
+.container{
+    width:100%;
+    max-width:1000px;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.header h1{
+    color:#7e22ce;
+}
+
+#darkModeBtn{
+    padding:10px 15px;
+    border:none;
+    border-radius:10px;
+    background:#c084fc;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.total-data{
+    margin-bottom:15px;
+    font-weight:bold;
+    color:#d946ef;
+}
+
+.top-bar{
+    display:flex;
+    gap:15px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.top-bar input,
+.top-bar select{
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    flex:1;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.input-group{
+    display:flex;
+    flex-direction:column;
+}
+
+label{
+    margin-bottom:8px;
+    font-weight:bold;
+    color:#6b21a8;
+}
+
+input,
+textarea,
+select{
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    outline:none;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+    border-color:#d946ef;
+}
+
+.gender{
+    margin-top:20px;
+}
+
+.gender label{
+    margin-right:20px;
+}
+
+.button-group{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.submit,
+.reset,
+.edit-btn,
+.delete-btn,
+.pagination button{
+    padding:10px 18px;
+    border:none;
+    border-radius:10px;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+    font-weight:bold;
+}
+
+.submit{
+    background:#4cbb17;
+}
+
+.reset{
+    background:#ef4444;
+}
+
+.edit-btn{
+    background:#c084fc;
+}
+
+.delete-btn{
+    background:#dc2626;
+}
+
+button:hover{
+    opacity:0.9;
+    transform:scale(1.03);
+}
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:30px;
+}
+
+th{
+    background:#d946ef;
+    color:white;
+}
+
+th,
+td{
+    border:1px solid #eee;
+    padding:12px;
+    text-align:center;
+}
+
+tr:nth-child(even){
+    background:#fdf4ff;
+}
+
+tr:hover{
+    background:#fae8ff;
+}
+
+.pagination{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+}
+
+.pagination button{
+    background:#c084fc;
+}
+
+/* DARK MODE */
+
+.dark-mode{
+    background:#2e1065;
+    color:white;
+}
+
+.dark-mode .container{
+    background:#581c87;
+}
+
+.dark-mode label,
+.dark-mode h1,
+.dark-mode td,
+.dark-mode .total-data{
+    color:white;
+}
+
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select{
+    background:#6f21a8;
+    color:white;
+    border:1px solid #9333ea;
+}
+
+.dark-mode tr:nth-child(even){
+    background:#6b21a8;
+}
+
+.dark-mode tr:hover{
+    background:#6b21a8;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:768px){
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Sistem Manajemen Mahasiswa</h1>
+
+        <button id="darkModeBtn">
+            🌙 Dark Mode
+        </button>
+    </div>
+
+    <div class="total-data" id="totalData">
+        Total Mahasiswa : 0
+    </div>
+
+    <!-- SEARCH -->
+
+    <div class="top-bar">
+
+        <input type="text"
+        id="search"
+        placeholder="Cari NIM atau Nama Mahasiswa...">
+
+        <select id="sortNama">
+
+            <option value="default">
+                Urutkan Nama
+            </option>
+
+            <option value="asc">
+                A - Z
+            </option>
+
+            <option value="desc">
+                Z - A
+            </option>
+
+        </select>
+
+    </div>
+
+    <!-- FORM -->
+
+    <form id="formMahasiswa">
+
+        <div class="form-grid">
+
+            <div class="input-group">
+                <label>NIM</label>
+                <input type="text" id="nim" required>
+            </div>
+
+            <div class="input-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="nama" required>
+            </div>
+
+            <div class="input-group">
+                <label>Alamat</label>
+                <textarea id="alamat" required></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" required>
+
+                <label style="margin-top:10px;">
+                    <input type="checkbox" id="showPass">
+                    Tampilkan Password
+                </label>
+            </div>
+
+        </div>
+
+        <div class="gender">
+
+            <label>
+                <input type="radio"
+                name="jk"
+                value="Pria"
+                required>
+
+                Pria
+            </label>
+
+            <label>
+                <input type="radio"
+                name="jk"
+                value="Wanita">
+
+                Wanita
+            </label>
+
+        </div>
+
+        <div class="button-group">
+
+            <button type="submit" class="submit">
+                Simpan
+            </button>
+
+            <button type="reset" class="reset">
+                Reset
+            </button>
+
+        </div>
+
+    </form>
+
+    <!-- TABLE -->
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>No</th>
+                    <th>NIM</th>
+                    <th>Nama</th>
+                    <th>Alamat</th>
+                    <th>JK</th>
+                    <th>Password</th>
+                    <th>Aksi</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="tableBody"></tbody>
+
+        </table>
+
+    </div>
+
+    <!-- PAGINATION -->
+
+    <div class="pagination">
+
+        <button id="prevBtn">
+            Prev
+        </button>
+
+        <span id="pageInfo"></span>
+
+        <button id="nextBtn">
+            Next
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+const form =
+document.getElementById("formMahasiswa");
+
+const tableBody =
+document.getElementById("tableBody");
+
+const search =
+document.getElementById("search");
+
+const sortNama =
+document.getElementById("sortNama");
+
+let mahasiswa =
+JSON.parse(
+localStorage.getItem("mahasiswa")
+) || [];
+
+let dataAsli = [...mahasiswa];
+
+let editIndex = -1;
+
+let currentPage = 1;
+
+const dataPerPage = 5;
+
+let filteredData = [...mahasiswa];
+
+/* TAMPILKAN DATA */
+
+function tampilkanData(
+data = filteredData
+){
+
+    tableBody.innerHTML = "";
+
+    let totalPage =
+    Math.ceil(
+    data.length / dataPerPage
+    );
+
+    if(currentPage > totalPage){
+
+        currentPage =
+        totalPage || 1;
+
+    }
+
+    let start =
+    (currentPage - 1)
+    * dataPerPage;
+
+    let end =
+    start + dataPerPage;
+
+    let paginatedData =
+    data.slice(start, end);
+
+    paginatedData.forEach(
+    (item, index)=>{
+
+        let row =
+        tableBody.insertRow();
+
+        row.innerHTML = `
+        <td>${start + index + 1}</td>
+        <td>${item.nim}</td>
+        <td>${item.nama}</td>
+        <td>${item.alamat}</td>
+        <td>${item.jk}</td>
+        <td>******</td>
+
+        <td>
+
+            <button
+            class="edit-btn"
+            onclick="editData(${mahasiswa.indexOf(item)})">
+
+            Edit
+
+            </button>
+
+            <button
+            class="delete-btn"
+            onclick="hapusData(${mahasiswa.indexOf(item)})">
+
+            Hapus
+
+            </button>
+
+        </td>
+        `;
+
+    });
+
+    document.getElementById("pageInfo")
+    .innerText =
+
+    `Halaman ${currentPage}
+    dari ${totalPage || 1}`;
+
+    document.getElementById("totalData")
+    .innerText =
+
+    `Total Mahasiswa : ${data.length}`;
+
+}
+
+/* SIMPAN DATA */
+
+form.addEventListener(
+"submit",
+function(e){
+
+    e.preventDefault();
+
+    const nim =
+    document.getElementById("nim").value;
+
+    const nama =
+    document.getElementById("nama").value;
+
+    const alamat =
+    document.getElementById("alamat").value;
+
+    const password =
+    document.getElementById("password").value;
+
+    const jk =
+    document.querySelector(
+    'input[name="jk"]:checked'
+    ).value;
+
+    /* VALIDASI */
+
+    if(
+
+        nim === "" ||
+        nama === "" ||
+        alamat === "" ||
+        password === ""
+
+    ){
+
+        alert(
+        "Semua data wajib diisi!"
+        );
+
+        return;
+
+    }
+
+    /* VALIDASI NIM */
+
+    let cekNim =
+    mahasiswa.some((item,index)=>
+
+        item.nim === nim &&
+        index !== editIndex
+
+    );
+
+    if(cekNim){
+
+        alert("NIM sudah ada!");
+
+        return;
+
+    }
+
+    const data = {
+
+        nim,
+        nama,
+        alamat,
+        password,
+        jk
+
+    };
+
+    if(editIndex === -1){
+
+        mahasiswa.push(data);
+
+        alert(
+        "Data berhasil ditambahkan!"
+        );
+
+    }else{
+
+        mahasiswa[editIndex] = data;
+
+        editIndex = -1;
+
+        alert(
+        "Data berhasil diupdate!"
+        );
+
+    }
+
+    simpanLocal();
+
+    form.reset();
+
+});
+
+/* RESET */
+
+form.addEventListener(
+"reset",
+function(){
+
+    editIndex = -1;
+
+});
+
+/* SIMPAN LOCAL STORAGE */
+
+function simpanLocal(){
+
+    localStorage.setItem(
+
+        "mahasiswa",
+
+        JSON.stringify(mahasiswa)
+
+    );
+
+    dataAsli = [...mahasiswa];
+
+    filteredData = [...mahasiswa];
+
+    tampilkanData();
+
+}
+
+/* EDIT */
+
+function editData(index){
+
+    document.getElementById("nim").value =
+    mahasiswa[index].nim;
+
+    document.getElementById("nama").value =
+    mahasiswa[index].nama;
+
+    document.getElementById("alamat").value =
+    mahasiswa[index].alamat;
+
+    document.getElementById("password").value =
+    mahasiswa[index].password;
+
+    document.querySelector(
+
+    `input[name="jk"][value="${mahasiswa[index].jk}"]`
+
+    ).checked = true;
+
+    editIndex = index;
+
+}
+
+/* HAPUS */
+
+function hapusData(index){
+
+    if(confirm(
+    "Yakin ingin menghapus data?"
+    )){
+
+        mahasiswa.splice(index,1);
+
+        simpanLocal();
+
+    }
+
+}
+
+/* SEARCH */
+
+search.addEventListener(
+"keyup",
+function(){
+
+    let keyword =
+    search.value.toLowerCase();
+
+    filteredData =
+
+    mahasiswa.filter(item =>
+
+        item.nim.toLowerCase()
+        .includes(keyword)
+
+        ||
+
+        item.nama.toLowerCase()
+        .includes(keyword)
+
+    );
+
+    currentPage = 1;
+
+    tampilkanData(filteredData);
+
+});
+
+/* SORTING */
+
+sortNama.addEventListener(
+"change",
+function(){
+
+    if(this.value === "asc"){
+
+        mahasiswa.sort((a,b)=>
+
+        a.nama.localeCompare(b.nama)
+
+        );
+
+    }
+
+    else if(
+    this.value === "desc"
+    ){
+
+        mahasiswa.sort((a,b)=>
+
+        b.nama.localeCompare(a.nama)
+
+        );
+
+    }
+
+    else{
+
+        mahasiswa = [...dataAsli];
+
+    }
+
+    filteredData = [...mahasiswa];
+
+    tampilkanData();
+
+});
+
+/* PAGINATION */
+
+document.getElementById("prevBtn")
+.addEventListener(
+"click",
+function(){
+
+    if(currentPage > 1){
+
+        currentPage--;
+
+        tampilkanData();
+
+    }
+
+});
+
+document.getElementById("nextBtn")
+.addEventListener(
+"click",
+function(){
+
+    let totalPage =
+
+    Math.ceil(
+    filteredData.length
+    / dataPerPage
+    );
+
+    if(currentPage < totalPage){
+
+        currentPage++;
+
+        tampilkanData();
+
+    }
+
+});
+
+/* DARK MODE */
+
+document.getElementById("darkModeBtn")
+.addEventListener(
+"click",
+function(){
+
+    document.body.classList
+    .toggle("dark-mode");
+
+    localStorage.setItem(
+
+        "darkMode",
+
+        document.body.classList
+        .contains("dark-mode")
+
+    );
+
+});
+
+/* SHOW PASSWORD */
+
+document.getElementById("showPass")
+.addEventListener(
+"change",
+function(){
+
+    const pass =
+    document.getElementById("password");
+
+    if(this.checked){
+
+        pass.type = "text";
+
+    }else{
+
+        pass.type = "password";
+
+    }
+
+});
+
+/* LOAD DARK MODE */
+
+if(
+localStorage.getItem("darkMode")
+=== "true"
+){
+
+    document.body.classList
+    .add("dark-mode");
+
+}
+
+/* AWAL */
+
+tampilkanData();
+
+</script>
+
+</body>
+</html>
